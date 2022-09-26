@@ -421,6 +421,13 @@ if(NOT BUILD_SHARED_LIBS)
 
     # Link OpenMP with seal
     # target_link_libraries(seal PRIVATE OpenMP::OpenMP_CXX)
+    # if(SEAL_USE_OPENMP)
+    # find_package(OpenMP)
+
+    # if(OpenMP_CXX_FOUND)
+    # target_link_libraries(seal PRIVATE OpenMP::OpenMP_CXX)
+    # endif()
+    # endif()
     find_package(OpenMP)
 
     if(OpenMP_CXX_FOUND)
@@ -496,10 +503,17 @@ else()
 
     # Link OpenMP with seal
     # target_link_libraries(seal PRIVATE OpenMP::OpenMP_CXX)
+    # if(SEAL_USE_OPENMP)
+    # find_package(OpenMP)
+
+    # if(OpenMP_CXX_FOUND)
+    # target_link_libraries(seal_shared PUBLIC OpenMP::OpenMP_CXX)
+    # endif()
+    # endif()
     find_package(OpenMP)
 
     if(OpenMP_CXX_FOUND)
-        target_link_libraries(seal_shared PUBLIC OpenMP::OpenMP_CXX)
+        target_link_libraries(seal_shared PRIVATE OpenMP::OpenMP_CXX)
     endif()
 
     if(SEAL_USE_MSGSL)
