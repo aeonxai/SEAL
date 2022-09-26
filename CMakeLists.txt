@@ -3,13 +3,13 @@
 
 cmake_minimum_required(VERSION 3.13)
 
-###################################################
+# ##################################################
 # Project SEAL includes the following components: #
-#   1. SEAL C++ library                           #
-#   2. SEAL C export library                      #
-#   3. SEAL C++ examples                          #
-#   4. SEAL C++ tests                             #
-###################################################
+# 1. SEAL C++ library                           #
+# 2. SEAL C export library                      #
+# 3. SEAL C++ examples                          #
+# 4. SEAL C++ tests                             #
+# ##################################################
 
 # [option] CMAKE_BUILD_TYPE (default: "Release")
 # Build in one of the following modes: Release, Debug, MiniSizeRel, or RelWithDebInfo.
@@ -21,13 +21,14 @@ if(NOT CMAKE_BUILD_TYPE)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY
         STRINGS "Release" "Debug" "MinSizeRel" "RelWithDebInfo")
 endif()
+
 message(STATUS "Build type (CMAKE_BUILD_TYPE): ${CMAKE_BUILD_TYPE}")
 
 project(SEAL VERSION 4.0.0 LANGUAGES CXX C)
 
-########################
+# #######################
 # Global configuration #
-########################
+# #######################
 
 # CMake modules
 include(CMakeDependentOption)
@@ -51,11 +52,13 @@ set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY OFF)
 # In Debug mode, define SEAL_DEBUG
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(SEAL_DEBUG ON)
+
     # In Debug mode, enable extra compiler flags.
     include(EnableCXXCompilerFlags)
 else()
     set(SEAL_DEBUG OFF)
 endif()
+
 message(STATUS "Microsoft SEAL debug mode: ${SEAL_DEBUG}")
 
 # [option] SEAL_USE_CXX17 (default: ON)
@@ -121,10 +124,9 @@ set(SEAL_PKGCONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 # Clean up artifacts from previous versions
 include(CleanArtifacts)
 
-#########################
+# ########################
 # External dependencies #
-#########################
-
+# ########################
 
 # [option] SEAL_BUILD_DEPS (default: ON)
 # Download and build missing dependencies, throw error if disabled.
@@ -151,6 +153,7 @@ if(SEAL_USE_MSGSL)
         seal_fetch_thirdparty_content(ExternalMSGSL)
     else()
         find_package(Microsoft.GSL 3 CONFIG)
+
         if(NOT Microsoft.GSL_FOUND)
             message(FATAL_ERROR "Microsoft GSL: not found")
         else()
@@ -171,11 +174,13 @@ if(SEAL_USE_ZLIB)
         set(zlib "zlibstatic")
     else()
         find_package(ZLIB 1.2.11)
+
         if(NOT ZLIB_FOUND)
             message(FATAL_ERROR "ZLIB: not found")
         else()
             message(STATUS "ZLIB: found")
         endif()
+
         set(zlib "ZLIB::ZLIB")
     endif()
 endif()
@@ -192,6 +197,7 @@ if(SEAL_USE_ZSTD)
         set(zstd_static "libzstd_static")
     else()
         find_package(zstd CONFIG)
+
         if(NOT zstd_FOUND)
             message(FATAL_ERROR "Zstandard: not found")
         else()
@@ -199,6 +205,7 @@ if(SEAL_USE_ZSTD)
                 set(zstd_static "zstd::libzstd_static")
             elseif(TARGET libzstd)
                 get_target_property(libzstd_type libzstd TYPE)
+
                 if(libzstd_type STREQUAL "STATIC_LIBRARY")
                     set(zstd_static "libzstd")
                     message(STATUS "Zstandard: found")
@@ -225,21 +232,23 @@ if(SEAL_USE_INTEL_HEXL)
         seal_fetch_thirdparty_content(ExternalIntelHEXL)
     else()
         find_package(HEXL 1.2.3)
-        if (NOT TARGET HEXL::hexl)
+
+        if(NOT TARGET HEXL::hexl)
             message(FATAL_ERROR "Intel HEXL: not found")
         endif()
     endif()
 endif()
 
-####################
+# ###################
 # SEAL C++ library #
-####################
+# ###################
 
 # [option] BUILD_SHARED_LIBS (default: OFF)
 # Build a shared library if set to ON. Build a static library regardlessly.
 set(BUILD_SHARED_LIBS_STR "Build shared library")
 option(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_STR} OFF)
 message(STATUS "BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
+
 if(WIN32 AND BUILD_SHARED_LIBS)
     message(FATAL_ERROR "On Windows only static build is supported; set `BUILD_SHARED_LIBS=OFF`")
 endif()
@@ -276,11 +285,14 @@ mark_as_advanced(FORCE SEAL_AVOID_BRANCHING)
 # [option] SEAL_USE_INTRIN (default: ON)
 set(SEAL_USE_INTRIN_OPTION_STR "Use intrinsics")
 option(SEAL_USE_INTRIN ${SEAL_USE_INTRIN_OPTION_STR} ON)
+
 # Look for header files, use intrinsics if available, set to OFF otherwise.
 include(CheckCXXIntrinsicsHeader)
+
 if(NOT SEAL_INTRIN_HEADER_FOUND)
     set(SEAL_USE_INTRIN OFF CACHE BOOL ${SEAL_USE_INTRIN_OPTION_STR} FORCE)
 endif()
+
 message(STATUS "SEAL_USE_INTRIN: ${SEAL_USE_INTRIN}")
 
 # [option] SEAL_USE_${A_SPECIFIC_INTRIN} (default: ON, advanced)
@@ -292,6 +304,7 @@ if(MSVC)
     set(SEAL_USE__UMUL128_OPTION_STR "Use _umul128")
     cmake_dependent_option(SEAL_USE__UMUL128 ${SEAL_USE__UMUL128_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
     mark_as_advanced(FORCE SEAL_USE__UMUL128)
+
     if(NOT SEAL__UMUL128_FOUND)
         set(SEAL_USE__UMUL128 OFF CACHE BOOL ${SEAL_USE__UMUL128_OPTION_STR} FORCE)
     endif()
@@ -299,6 +312,7 @@ if(MSVC)
     set(SEAL_USE__BITSCANREVERSE64_OPTION_STR "Use _BitScanReverse64")
     cmake_dependent_option(SEAL_USE__BITSCANREVERSE64 ${SEAL_USE__BITSCANREVERSE64_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
     mark_as_advanced(FORCE SEAL_USE__BITSCANREVERSE64)
+
     if(NOT SEAL__BITSCANREVERSE64_FOUND)
         set(SEAL_USE__BITSCANREVERSE64 OFF CACHE BOOL ${SEAL_USE__BITSCANREVERSE64_OPTION_STR} FORCE)
     endif()
@@ -306,6 +320,7 @@ else()
     set(SEAL_USE___INT128_OPTION_STR "Use __int128")
     cmake_dependent_option(SEAL_USE___INT128 ${SEAL_USE___INT128_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
     mark_as_advanced(FORCE SEAL_USE___INT128)
+
     if(NOT SEAL___INT128_FOUND)
         set(SEAL_USE___INT128 OFF CACHE BOOL ${SEAL_USE___INT128_OPTION_STR} FORCE)
     endif()
@@ -313,6 +328,7 @@ else()
     set(SEAL_USE___BUILTIN_CLZLL_OPTION_STR "Use __builtin_clzll")
     cmake_dependent_option(SEAL_USE___BUILTIN_CLZLL ${SEAL_USE___BUILTIN_CLZLL_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
     mark_as_advanced(FORCE SEAL_USE___BUILTIN_CLZLL)
+
     if(NOT SEAL___BUILTIN_CLZLL_FOUND)
         set(SEAL_USE___BUILTIN_CLZLL OFF CACHE BOOL ${SEAL_USE___BUILTIN_CLZLL_OPTION_STR} FORCE)
     endif()
@@ -321,6 +337,7 @@ endif()
 set(SEAL_USE__ADDCARRY_U64_OPTION_STR "Use _addcarry_u64")
 cmake_dependent_option(SEAL_USE__ADDCARRY_U64 ${SEAL_USE__ADDCARRY_U64_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
 mark_as_advanced(FORCE SEAL_USE__ADDCARRY_U64)
+
 if(NOT SEAL__ADDCARRY_U64_FOUND)
     set(SEAL_USE__ADDCARRY_U64 OFF CACHE BOOL ${SEAL_USE__ADDCARRY_U64_OPTION_STR} FORCE)
 endif()
@@ -328,6 +345,7 @@ endif()
 set(SEAL_USE__SUBBORROW_U64_OPTION_STR "Use _subborrow_u64")
 cmake_dependent_option(SEAL_USE__SUBBORROW_U64 ${SEAL_USE__SUBBORROW_U64_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
 mark_as_advanced(FORCE SEAL_USE__SUBBORROW_U64)
+
 if(NOT SEAL__SUBBORROW_U64_FOUND)
     set(SEAL_USE__SUBBORROW_U64 OFF CACHE BOOL ${SEAL_USE__SUBBORROW_U64_OPTION_STR} FORCE)
 endif()
@@ -339,25 +357,31 @@ include(CheckMemset)
 set(SEAL_USE_MEMSET_S_OPTION_STR "Use memset_s")
 option(SEAL_USE_MEMSET_S ${SEAL_USE_MEMSET_S_OPTION_STR} ON)
 mark_as_advanced(FORCE SEAL_USE_MEMSET_S)
+
 if(NOT SEAL_MEMSET_S_FOUND)
     set(SEAL_USE_MEMSET_S OFF CACHE BOOL ${SEAL_USE_MEMSET_S_OPTION_STR} FORCE)
 endif()
+
 message(STATUS "SEAL_USE_MEMSET_S: ${SEAL_USE_MEMSET_S}")
 
 set(SEAL_USE_EXPLICIT_BZERO_OPTION_STR "Use explicit_bzero")
 option(SEAL_USE_EXPLICIT_BZERO ${SEAL_USE_EXPLICIT_BZERO_OPTION_STR} ON)
 mark_as_advanced(FORCE SEAL_USE_EXPLICIT_BZERO)
+
 if(NOT SEAL_EXPLICIT_BZERO_FOUND)
     set(SEAL_USE_EXPLICIT_BZERO OFF CACHE BOOL ${SEAL_USE_EXPLICIT_BZERO_OPTION_STR} FORCE)
 endif()
+
 message(STATUS "SEAL_USE_EXPLICIT_BZERO: ${SEAL_USE_EXPLICIT_BZERO}")
 
 set(SEAL_USE_EXPLICIT_MEMSET_OPTION_STR "Use explicit_memset")
 option(SEAL_USE_EXPLICIT_MEMSET ${SEAL_USE_EXPLICIT_MEMSET_OPTION_STR} ON)
 mark_as_advanced(FORCE SEAL_USE_EXPLICIT_MEMSET)
+
 if(NOT SEAL_EXPLICIT_MEMSET_FOUND)
     set(SEAL_USE_EXPLICIT_MEMSET OFF CACHE BOOL ${SEAL_USE_EXPLICIT_MEMSET_OPTION_STR} FORCE)
 endif()
+
 message(STATUS "SEAL_USE_EXPLICIT_MEMSET: ${SEAL_USE_EXPLICIT_MEMSET}")
 
 # [option] SEAL_USE_ALIGNED_ALLOC (default: ON, advanced)
@@ -368,6 +392,7 @@ if(MSVC)
 else()
     set(SEAL_USE_ALIGNED_ALLOC_OPTION_STR "Use ::aligned_alloc")
 endif()
+
 cmake_dependent_option(SEAL_USE_ALIGNED_ALLOC ${SEAL_USE_ALIGNED_ALLOC_OPTION_STR} ON "SEAL_USE_CXX17;NOT ANDROID_ABI" OFF)
 mark_as_advanced(FORCE SEAL_USE_ALIGNED_ALLOC)
 
@@ -391,17 +416,16 @@ if(NOT BUILD_SHARED_LIBS)
     seal_link_threads(seal)
     seal_install_target(seal SEALTargets)
 
+    # Require OpenMP library
+    # find_package(OpenMP REQUIRED)
 
+    # Link OpenMP with seal
+    # target_link_libraries(seal PRIVATE OpenMP::OpenMP_CXX)
+    find_package(OpenMP)
 
-# Require OpenMP library
-#find_package(OpenMP REQUIRED)
-
-# Link OpenMP with seal
-#target_link_libraries(seal PRIVATE OpenMP::OpenMP_CXX)
-find_package(OpenMP)
-if(OpenMP_CXX_FOUND)
-    target_link_libraries(seal PUBLIC OpenMP::OpenMP_CXX)
-endif()
+    if(OpenMP_CXX_FOUND)
+        target_link_libraries(seal PRIVATE OpenMP::OpenMP_CXX)
+    endif()
 
     if(SEAL_USE_MSGSL)
         if(SEAL_BUILD_DEPS)
@@ -440,9 +464,11 @@ endif()
                 $<BUILD_INTERFACE:$<TARGET_PROPERTY:HEXL::hexl,INTERFACE_INCLUDE_DIRECTORIES>>)
             target_compile_options(seal PRIVATE $<TARGET_PROPERTY:HEXL::hexl,INTERFACE_COMPILE_OPTIONS>)
             get_target_property(HEXL_INTERFACE_LINK_OPTIONS HEXL::hexl INTERFACE_LINK_OPTIONS)
-            if (NOT "${HEXL_INTERFACE_LINK_OPTIONS}" STREQUAL "HEXL_INTERFACE_LINK_OPTIONS-NOTFOUND")
+
+            if(NOT "${HEXL_INTERFACE_LINK_OPTIONS}" STREQUAL "HEXL_INTERFACE_LINK_OPTIONS-NOTFOUND")
                 target_link_libraries(seal INTERFACE ${HEXL_INTERFACE_LINK_OPTIONS})
             endif()
+
             seal_combine_archives(seal HEXL::hexl)
         else()
             target_link_libraries(seal PUBLIC HEXL::hexl)
@@ -464,15 +490,18 @@ else()
     seal_set_version(seal_shared)
     seal_link_threads(seal_shared)
     seal_install_target(seal_shared SEALTargets)
-# Require OpenMP library
-#find_package(OpenMP REQUIRED)
 
-# Link OpenMP with seal
-#target_link_libraries(seal PRIVATE OpenMP::OpenMP_CXX)
-find_package(OpenMP)
-if(OpenMP_CXX_FOUND)
-    target_link_libraries(seal_shared PUBLIC OpenMP::OpenMP_CXX)
-endif()
+    # Require OpenMP library
+    # find_package(OpenMP REQUIRED)
+
+    # Link OpenMP with seal
+    # target_link_libraries(seal PRIVATE OpenMP::OpenMP_CXX)
+    find_package(OpenMP)
+
+    if(OpenMP_CXX_FOUND)
+        target_link_libraries(seal_shared PUBLIC OpenMP::OpenMP_CXX)
+    endif()
+
     if(SEAL_USE_MSGSL)
         if(SEAL_BUILD_DEPS)
             target_include_directories(seal_shared PUBLIC $<BUILD_INTERFACE:${msgsl_SOURCE_DIR}/include>)
@@ -497,7 +526,8 @@ endif()
         target_link_libraries(seal_shared PRIVATE HEXL::hexl)
         target_compile_options(seal_shared PRIVATE $<TARGET_PROPERTY:HEXL::hexl,INTERFACE_COMPILE_OPTIONS>)
         get_target_property(HEXL_INTERFACE_LINK_OPTIONS HEXL::hexl INTERFACE_LINK_OPTIONS)
-        if (NOT "${HEXL_INTERFACE_LINK_OPTIONS}" STREQUAL "HEXL_INTERFACE_LINK_OPTIONS-NOTFOUND")
+
+        if(NOT "${HEXL_INTERFACE_LINK_OPTIONS}" STREQUAL "HEXL_INTERFACE_LINK_OPTIONS-NOTFOUND")
             target_link_libraries(seal_shared INTERFACE ${HEXL_INTERFACE_LINK_OPTIONS})
         endif()
 
@@ -505,7 +535,7 @@ endif()
         install(DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
             DESTINATION ${CMAKE_INSTALL_PREFIX}/${CMAKE_LIBRARY_PREFIX}
             FILES_MATCHING PATTERN "*hexl*"
-            )
+        )
     endif()
 endif()
 
@@ -513,13 +543,14 @@ endif()
 if(TARGET seal)
     add_library(SEAL::seal ALIAS seal)
 endif()
+
 if(TARGET seal_shared)
     add_library(SEAL::seal_shared ALIAS seal_shared)
 endif()
 
-#########################
+# ########################
 # SEAL C export library #
-#########################
+# ########################
 
 # [option] SEAL_BUILD_SEAL_C (default: OFF)
 set(SEAL_BUILD_SEAL_C_OPTION_STR "Build C export library for Microsoft SEAL")
@@ -535,17 +566,19 @@ if(SEAL_BUILD_SEAL_C)
     # Check that size_t is 8 bytes
     include(CheckTypeSize)
     check_type_size("size_t" SIZET LANGUAGE C)
+
     if(NOT ${SIZET} EQUAL 8)
         unset(SIZET CACHE)
         unset(HAVE_SIZET CACHE)
         message(FATAL_ERROR "SEAL_C requires 64-bit platform")
     endif()
+
     unset(SIZET CACHE)
     unset(HAVE_SIZET CACHE)
 
     if(BUILD_SHARED_LIBS)
         message(FATAL_ERROR "SEAL_C (shared or static) requires a static SEAL; set `BUILD_SHARED_LIBS=OFF` and control "
-                            "SEAL_C by setting `SEAL_BUILD_STATIC_SEAL_C` to `OFF` (default) or `ON`")
+            "SEAL_C by setting `SEAL_BUILD_STATIC_SEAL_C` to `OFF` (default) or `ON`")
     endif()
 
     if(NOT SEAL_BUILD_DEPS)
@@ -554,7 +587,7 @@ if(SEAL_BUILD_SEAL_C)
 
     if(NOT SEAL_BUILD_STATIC_SEAL_C AND SEAL_USE_INTEL_HEXL AND CMAKE_BUILD_TYPE STREQUAL "Debug" AND UNIX)
         message(WARNING "SEAL_C (shared) cannot find Address Sanitizer (libasan) enabled by Intel HEXL in Debug mode "
-                        "on Unix-like systems. SEALNet does not work. Preload libasan for downstream applications.")
+            "on Unix-like systems. SEALNet does not work. Preload libasan for downstream applications.")
     endif()
 
     if(SEAL_BUILD_STATIC_SEAL_C)
@@ -566,14 +599,17 @@ if(SEAL_BUILD_SEAL_C)
     # Add source files to library and header files to install
     add_subdirectory(${SEAL_INCLUDES_DIR}/seal/c)
     seal_set_version(sealc)
+
     if(SEAL_BUILD_STATIC_SEAL_C)
         seal_set_version_filename(sealc)
     else()
         seal_set_soversion(sealc)
     endif()
+
     seal_set_language(sealc)
     seal_set_include_directories(sealc)
-    if (SEAL_USE_INTEL_HEXL)
+
+    if(SEAL_USE_INTEL_HEXL)
         target_include_directories(sealc PRIVATE $<BUILD_INTERFACE:${hexl_SOURCE_DIR}/hexl/include>)
     endif()
 
@@ -587,9 +623,9 @@ if(TARGET sealc)
     add_library(SEAL::sealc ALIAS sealc)
 endif()
 
-#################################
+# ################################
 # Installation and CMake config #
-#################################
+# ################################
 
 # Create the CMake config file
 include(CMakePackageConfigHelpers)
@@ -612,8 +648,8 @@ write_basic_package_version_file(
 # Install config and module files
 install(
     FILES
-        ${SEAL_CONFIG_FILENAME}
-        ${SEAL_CONFIG_VERSION_FILENAME}
+    ${SEAL_CONFIG_FILENAME}
+    ${SEAL_CONFIG_VERSION_FILENAME}
     DESTINATION ${SEAL_CONFIG_INSTALL_DIR})
 
 # We export SEALTargets from the build tree so it can be used by other projects
@@ -633,10 +669,9 @@ if(SEAL_BUILD_DEPS)
     endif()
 endif()
 
-##############
+# #############
 # pkg-config #
-##############
-
+# #############
 if(UNIX OR APPLE)
     # Set the requirements according to the current configuration if SEAL_BUILD_DEPS=OFF
     if(NOT SEAL_BUILD_DEPS)
@@ -652,12 +687,15 @@ if(UNIX OR APPLE)
 
             set(SEAL_PKGCONFIG_MSGSL_REQUIRES_STRING "seal_msgsl >= ${Microsoft.GSL_VERSION_MAJOR}")
         endif()
+
         if(SEAL_USE_ZLIB)
             set(SEAL_PKGCONFIG_ZLIB_REQUIRES_STRING "zlib = ${ZLIB_VERSION_STRING}")
         endif()
+
         if(SEAL_USE_ZSTD)
             set(SEAL_PKGCONFIG_ZSTD_REQUIRES_STRING "libzstd >= ${zstd_VERSION_MAJOR}")
         endif()
+
         if(SEAL_USE_INTEL_HEXL)
             set(SEAL_PKGCONFIG_INTEL_HEXL_REQUIRES_STRING "hexl >= ${HEXL_VERSION_MAJOR}")
             message(STATUS "Intel HEXL does not have a pkg-config file")
@@ -668,6 +706,7 @@ if(UNIX OR APPLE)
     if(TARGET seal)
         configure_file(${SEAL_PKGCONFIG_IN_FILENAME} ${SEAL_PKGCONFIG_FILENAME} @ONLY)
     endif()
+
     if(TARGET seal_shared)
         configure_file(${SEAL_PKGCONFIG_SHARED_IN_FILENAME} ${SEAL_PKGCONFIG_SHARED_FILENAME} @ONLY)
     endif()
@@ -678,11 +717,13 @@ if(UNIX OR APPLE)
             FILES ${SEAL_PKGCONFIG_FILENAME}
             DESTINATION ${SEAL_PKGCONFIG_INSTALL_DIR})
     endif()
+
     if(EXISTS ${SEAL_PKGCONFIG_SHARED_FILENAME})
         install(
             FILES ${SEAL_PKGCONFIG_SHARED_FILENAME}
             DESTINATION ${SEAL_PKGCONFIG_INSTALL_DIR})
     endif()
+
     if(EXISTS ${SEAL_PKGCONFIG_MSGSL_FILENAME})
         install(
             FILES ${SEAL_PKGCONFIG_MSGSL_FILENAME}
@@ -690,9 +731,9 @@ if(UNIX OR APPLE)
     endif()
 endif()
 
-#####################
+# ####################
 # SEAL C++ examples #
-#####################
+# ####################
 
 # [option] SEAL_BUILD_EXAMPLES
 set(SEAL_BUILD_EXAMPLES_OPTION_STR "Build C++ examples for Microsoft SEAL")
@@ -703,9 +744,9 @@ if(SEAL_BUILD_EXAMPLES)
     add_subdirectory(native/examples)
 endif()
 
-##################
+# #################
 # SEAL C++ tests #
-##################
+# #################
 
 # [option] SEAL_BUILD_TESTS
 set(SEAL_BUILD_TESTS_OPTION_STR "Build C++ tests for Microsoft SEAL")
@@ -716,9 +757,9 @@ if(SEAL_BUILD_TESTS)
     add_subdirectory(native/tests)
 endif()
 
-#######################
+# ######################
 # SEAL C++ benchmarks #
-#######################
+# ######################
 
 # [option] SEAL_BUILD_BENCH
 set(SEAL_BUILD_BENCH_OPTION_STR "Build C++ benchmarks for Microsoft SEAL")
@@ -729,13 +770,14 @@ if(SEAL_BUILD_BENCH)
     add_subdirectory(native/bench)
 endif()
 
-#######################################
+# ######################################
 # Configure SEALNet and NuGet package #
-#######################################
+# ######################################
 
 # In Windows we will set the SEAL_C library path according to the CMake generator
 set(SEAL_WINDOWS_SEAL_C_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 get_property(SEAL_IS_MULTI_CONFIG_GENERATOR GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+
 if(SEAL_IS_MULTI_CONFIG_GENERATOR)
     # Is this the Visual Studio generator? If so, the output path will contain the configuration.
     # We shall use CMAKE_BUILD_TYPE here, which by default will be "Release". The user has the
@@ -793,6 +835,3 @@ configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet.nuspec.in
     ${CMAKE_CURRENT_BINARY_DIR}/dotnet/nuget/SEALNet.nuspec
     @ONLY)
-
-
-
