@@ -5,6 +5,13 @@ cmake_minimum_required(VERSION 3.13)
 
 project(SEALExamples VERSION 4.0.0 LANGUAGES CXX)
 
+
+find_package(OpenMP REQUIRED)
+
+# Link OpenMP
+target_link_libraries(sealexamples OpenMP::OpenMP_CXX)
+
+
 # If not called from root CMakeLists.txt
 if(NOT DEFINED SEAL_BUILD_EXAMPLES)
     set(SEAL_BUILD_EXAMPLES ON)

@@ -227,6 +227,7 @@ namespace seal
             sample_poly_ternary(prng, parms, u.get());
 
             // c[j] = u * public_key[j]
+            #pragma omp parallel for
             for (size_t i = 0; i < coeff_modulus_size; i++)
             {
                 ntt_negacyclic_harvey(u.get() + i * coeff_count, ntt_tables[i]);
@@ -246,6 +247,7 @@ namespace seal
 
             // Generate e_j <-- chi
             // c[j] = public_key[j] * u + e[j] in BFV/CKKS, = public_key[j] * u + p * e[j] in BGV,
+            #pragma omp parallel for
             for (size_t j = 0; j < encrypted_size; j++)
             {
                 SEAL_NOISE_SAMPLER(prng, parms, u.get());

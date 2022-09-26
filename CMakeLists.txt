@@ -125,6 +125,13 @@ include(CleanArtifacts)
 # External dependencies #
 #########################
 
+# Require OpenMP library
+find_package(OpenMP REQUIRED)
+
+# Link OpenMP with seal
+target_link_libraries(seal PRIVATE OpenMP::OpenMP_CXX)
+
+
 # [option] SEAL_BUILD_DEPS (default: ON)
 # Download and build missing dependencies, throw error if disabled.
 set(SEAL_BUILD_DEPS_OPTION_STR "Automatically download and build unmet dependencies")
