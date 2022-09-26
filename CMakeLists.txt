@@ -125,18 +125,6 @@ include(CleanArtifacts)
 # External dependencies #
 #########################
 
-# Require OpenMP library
-find_package(OpenMP REQUIRED)
-
-if (OPENMP_FOUND)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-endif()
-
-# Link OpenMP with seal
-target_link_libraries(seal PRIVATE OpenMP::OpenMP_CXX)
-
 
 # [option] SEAL_BUILD_DEPS (default: ON)
 # Download and build missing dependencies, throw error if disabled.
@@ -403,6 +391,18 @@ if(NOT BUILD_SHARED_LIBS)
     seal_link_threads(seal)
     seal_install_target(seal SEALTargets)
 
+
+
+# Require OpenMP library
+#find_package(OpenMP REQUIRED)
+
+# Link OpenMP with seal
+#target_link_libraries(seal PRIVATE OpenMP::OpenMP_CXX)
+find_package(OpenMP)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(seal PUBLIC OpenMP::OpenMP_CXX)
+endif()
+
     if(SEAL_USE_MSGSL)
         if(SEAL_BUILD_DEPS)
             target_include_directories(seal PUBLIC $<BUILD_INTERFACE:${msgsl_SOURCE_DIR}/include>)
@@ -464,7 +464,15 @@ else()
     seal_set_version(seal_shared)
     seal_link_threads(seal_shared)
     seal_install_target(seal_shared SEALTargets)
+# Require OpenMP library
+#find_package(OpenMP REQUIRED)
 
+# Link OpenMP with seal
+#target_link_libraries(seal PRIVATE OpenMP::OpenMP_CXX)
+find_package(OpenMP)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(seal_shared PUBLIC OpenMP::OpenMP_CXX)
+endif()
     if(SEAL_USE_MSGSL)
         if(SEAL_BUILD_DEPS)
             target_include_directories(seal_shared PUBLIC $<BUILD_INTERFACE:${msgsl_SOURCE_DIR}/include>)
@@ -785,3 +793,6 @@ configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet.nuspec.in
     ${CMAKE_CURRENT_BINARY_DIR}/dotnet/nuget/SEALNet.nuspec
     @ONLY)
+
+
+
