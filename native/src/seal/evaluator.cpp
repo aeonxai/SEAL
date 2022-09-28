@@ -254,6 +254,7 @@ namespace seal
         }
 
         destination = encrypteds[0];
+        #pragma omp parallel for default(none) shared(encrypteds, destination) 
         for (size_t i = 1; i < encrypteds.size(); i++)
         {
             add_inplace(destination, encrypteds[i]);
