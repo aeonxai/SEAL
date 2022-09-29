@@ -254,7 +254,7 @@ namespace seal
         }
 
         destination = encrypteds[0];
-        #pragma omp parallel for default(none) shared(encrypteds, destination) 
+        #pragma omp parallel for default(none) shared(encrypteds, destination)  
         for (size_t i = 1; i < encrypteds.size(); i++)
         {
             add_inplace(destination, encrypteds[i]);
@@ -1599,6 +1599,8 @@ namespace seal
         }
 
         // Repeatedly multiply and add to the back of the vector until the end is reached
+        // #pragma omp parallel for default(none) num_threads(omp_get_max_threads()) \
+        //     shared(product_vec, encrypteds, relin_keys, pool)
         for (size_t i = 0; i < product_vec.size() - 1; i += 2)
         {
             Ciphertext temp(context_, context_data.parms_id(), pool);
