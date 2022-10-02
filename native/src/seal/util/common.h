@@ -30,10 +30,16 @@ namespace seal
         template <typename ForwardIt, typename Size, typename Func>
         inline ForwardIt seal_for_each_n(ForwardIt first, Size size, Func &&func)
         {
-            for (; size--; (void)++first)
+            Size s = size;
+            #pragma omp parallel for
+            for (Size x=0; x < s; x++, size--, (void)++first)
             {
                 func(*first);
             }
+            // for (; size--; (void)++first)
+            // {
+            //     func(*first);
+            // }
             return first;
         }
 
